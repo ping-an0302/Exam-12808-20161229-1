@@ -1,0 +1,119 @@
+ <beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+<!-- 读取配置文件 -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:jdbc/dbconfig.properties</value>
+		</property>
+	</bean>
+
+<!-- 配置数据源 -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName">
+			<value>${jdbc.driver}</value>
+		</property>
+		<property name="url">
+			<value>${jdbc.url}</value>
+		</property>
+		<property name="username">
+			<value>${jdbc.username}</value>
+		</property>
+		<property name="password">
+			<value>${jdbc.password}</value>
+		</property>
+		<!-- 最大连接数 -->
+		<property name="maxActive">
+			<value>80</value>
+		</property>
+		<!-- 最大空闲连接数 -->
+		<property name="maxIdle">
+			<value>20</value>
+		</property>
+		<!-- 最大等待时间:当没有可用连接时,连接池等待连接被归还的最大时间 单位:毫秒 -->
+		<!-- 超过时间则抛出异常,如果设置为-1表示无限等待 -->
+		<property name="maxWait">
+			<value>3000</value>
+		</property>
+	</bean>
+	
+<!-- 配置mybatis信息 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> 
+	  <property name="dataSource" ref="dataSource" /> 
+	  <property name="mapperLocations" >
+	  	<array>
+		  	<value>classpath:mappers/FilmMapper.xml</value>
+	  	</array>
+	  </property>
+	  <property name="typeAliasesPackage" value="hand.Exam_12808_20161229_1.bean" /> 
+	</bean>            
+	
+<!-- 配置mapper -->
+	 <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+       	<property name="basePackage" value="hand.Exam_12808_20161229_1.mapper" />  
+       	<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+    </bean> 
+
+<!-- 配置事件监听 -->
+	<!-- 自定义发布事件的类 -->
+	<bean name="before" class="hand.Exam_12808_20161229_1.common.publisher.BeforeEventPublisher"></bean>
+	<bean name="after" class="hand.Exam_12808_20161229_1.common.publisher.AfterEventPublisher"></bean>
+	
+	<!-- 事件处理类 -->
+	<bean class="hand.Exam_12808_20161229_1.common.listener.BeforeEventHandler"></bean>
+	<bean class="hand.Exam_12808_20161229_1.common.listener.AfterEventHandler"></bean>
+	<bean class="hand.Exam_12808_20161229_1.common.listener.StartEventHandler"></bean>
+	<bean class="hand.Exam_12808_20161229_1.common.listener.StopEventHandler"></bean>
+
+<!-- 配置service -->
+	<bean name="service" class="hand.Exam_12808_20161229_1.service.impl.FilmServiceImpl">
+		<property name="filmmapper" ref="filmMapper"></property>
+	</bean>
+	
+<!-- 配置切面类 -->
+    <bean name="handler" class="hand.Exam_12808_20161229_1.common.aspect.AspectHandler">
+    	<property name="beforepublisher" ref="before"></property>
+    	<property name="afterpublisher" ref="after"></property>
+    </bean>
+
+<!-- 事物管理 -->
+	<bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+	</bean>
+	
+<!--通知Spring我在目标对象中做了事物的注解且指明事物管理器 -->
+	<tx:advice id="transactionInterceptor" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED"  rollback-for="Throwable"/>
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+		<aop:pointcut expression="execution(public * hand.Exam_12808_20161229_1.service.impl.*.*(..))" id="myPointCut"/>
+		<aop:advisor advice-ref="transactionInterceptor" pointcut-ref="myPointCut"/>
+    	<aop:aspect ref="handler" id="myaspect">
+    	
+    		<!-- 拦截类型 -->
+    		<aop:around method="aroundTest" pointcut-ref="myPointCut" />
+    	</aop:aspect>
+	</aop:config>
+	
+            
+
+	
+	
+	
+ </beans>

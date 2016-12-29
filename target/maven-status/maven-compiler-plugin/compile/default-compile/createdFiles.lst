@@ -1,0 +1,14 @@
+hand\Exam_12808_20161229_1\service\IFilmService.class
+hand\Exam_12808_20161229_1\common\event\BeforeInsertFilmEvent.class
+hand\Exam_12808_20161229_1\mapper\FilmMapper.class
+hand\Exam_12808_20161229_1\common\listener\AfterEventHandler.class
+hand\Exam_12808_20161229_1\common\listener\StopEventHandler.class
+hand\Exam_12808_20161229_1\AppTest.class
+hand\Exam_12808_20161229_1\bean\Film.class
+hand\Exam_12808_20161229_1\common\publisher\AfterEventPublisher.class
+hand\Exam_12808_20161229_1\common\aspect\AspectHandler.class
+hand\Exam_12808_20161229_1\common\event\AfterInsertFilmEvent.class
+hand\Exam_12808_20161229_1\common\listener\StartEventHandler.class
+hand\Exam_12808_20161229_1\common\listener\BeforeEventHandler.class
+hand\Exam_12808_20161229_1\common\publisher\BeforeEventPublisher.class
+hand\Exam_12808_20161229_1\service\impl\FilmServiceImpl.class
